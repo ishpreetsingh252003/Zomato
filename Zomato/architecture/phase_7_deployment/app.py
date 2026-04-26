@@ -4,21 +4,20 @@ import pandas as pd
 from pathlib import Path
 import time
 import os
+import json
 
 # --- PATH CONFIGURATION ---
-_ARCH_DIR = Path(__file__).resolve().parent.parent
+_DEPLOY_DIR = Path(__file__).resolve().parent
+_ARCH_DIR = _DEPLOY_DIR.parent
 p6_backend_dir = str(_ARCH_DIR / "phase_6_monitoring" / "backend")
 if p6_backend_dir not in sys.path:
     sys.path.insert(0, p6_backend_dir)
-p6_dir = str(_ARCH_DIR / "phase_6_monitoring")
-if p6_dir not in sys.path:
-    sys.path.insert(0, p6_dir)
 
 import orchestrator
 import analytics_logger
 
 # --- STREAMLIT CONFIG ---
-st.set_page_config(page_title="Zomato AI Recommendations", layout="wide", page_icon="🍽️")
+st.set_page_config(page_title="Zomato AI Recommendations", layout="centered", page_icon="🍽️")
 
 # --- CUSTOM CSS ---
 st.markdown("""
@@ -26,132 +25,98 @@ st.markdown("""
 div.stButton > button {
     border-radius: 20px;
     font-weight: 600;
+    width: 100%;
+    background-color: #e23744;
+    color: white;
+}
+.stSlider [data-baseweb="slider"] {
+    margin-top: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# --- SIDEBAR NAVIGATION ---
-st.sidebar.title("Zomato AI")
-st.sidebar.markdown("Phase 7 Deployment")
-page = st.sidebar.radio("Navigation", ["🔍 Find Restaurants", "📊 Analytics Dashboard"])
-
-# --- CACHED METADATA ---
-@st.cache_data(ttl=3600)
+# --- LOAD METADATA DIRECTLY ---
 def load_metadata():
+    meta_p = _DEPLOY_DIR / "metadata.json"
+    if meta_p.exists():
+        try:
+            return json.loads(meta_p.read_text(encoding="utf-8"))
+        except:
+            pass
+    # Fallback to local import if possible, or defaults
     try:
         return orchestrator.get_metadata()
-    except Exception as e:
-        return {"locations": ["Bangalore", "Indiranagar", "Koramangala"], "cuisines": ["Italian", "Chinese", "Cafe", "North Indian"]}
+    except:
+        return {
+            "locations": ["Bangalore", "Indiranagar", "Koramangala", "HSR Layout", "Whitefield"], 
+            "cuisines": ["Italian", "Chinese", "North Indian", "South Indian", "Cafe", "Desserts"]
+        }
 
 metadata = load_metadata()
 
 # =========================================================================
-# PAGE 1: USER UI
+# MAIN USER UI (Single Page)
 # =========================================================================
-if page == "🔍 Find Restaurants":
-    st.title("Find your perfect restaurant")
-    st.markdown("Describe your preferences and our AI ranks the best options with clear, personalised explanations.")
-    
-    with st.form("preference_form"):
-        col1, col2 = st.columns(2)
-        with col1:
-            location = st.selectbox("📍 Location", metadata.get("locations", ["Bangalore"]))
-            budget_raw = st.slider("💰 Budget (₹)", min_value=200, max_value=4000, value=1000, step=100)
-        with col2:
-            cuisines = st.selectbox("🍜 Cuisine", ["Any"] + metadata.get("cuisines", []))
-            min_rating = st.slider("⭐ Minimum Rating", min_value=0.0, max_value=5.0, value=4.0, step=0.1)
-        
-        optional_prefs = st.text_input("✨ Optional Preferences (comma-separated)", "quick-service")
-        top_n = st.selectbox("🏆 Number of Results", [1, 3, 5, 10], index=2)
-        
-        submitted = st.form_submit_button("Get Recommendations ➔")
-    
-    if submitted:
-        # Convert budget to categories expected by engine
-        budget_str = "low" if budget_raw <= 600 else ("medium" if budget_raw <= 1500 else "high")
-        cuisine_list = [] if cuisines == "Any" else [cuisines]
-        opt_prefs_list = [p.strip() for p in optional_prefs.split(",") if p.strip()]
-        
-        preferences = {
-            "location": location,
-            "budget": budget_str,
-            "cuisines": cuisine_list,
-            "min_rating": min_rating,
-            "optional_preferences": opt_prefs_list
-        }
-        
-        with st.spinner("Finding the best restaurants using AI..."):
-            start_time = time.time()
-            try:
-                result = orchestrator.run_pipeline(preferences, top_n=top_n)
-                latency_ms = (time.time() - start_time) * 1000.0
-                
-                recs = result.get("recommendations", [])
-                query_id = analytics_logger.log_query(preferences, len(recs), latency_ms)
-                
-                st.subheader(f"Top {len(recs)} Recommendations")
-                st.caption(f"Source: {result.get('source', 'unknown').upper()}")
-                
-                for rec in recs:
-                    with st.container():
-                        st.markdown(f"### #{rec['rank']} {rec['restaurant_name']}")
-                        st.markdown(f"**{rec.get('cuisine', '')}** | ⭐ {rec.get('rating', 'N/A')} | 💸 ₹{rec.get('cost_for_two', 'N/A')} for 2")
-                        st.info(f"**Why recommended:** {rec.get('explanation', '')}")
-                        
-                        # Interactive Feedback Buttons
-                        col_like, col_dislike, _ = st.columns([1, 1, 8])
-                        with col_like:
-                            if st.button("👍", key=f"like_{query_id}_{rec['rank']}"):
-                                analytics_logger.log_feedback(query_id, rec['restaurant_name'], "like")
-                                st.toast("Feedback submitted! Thanks.")
-                        with col_dislike:
-                            if st.button("👎", key=f"dislike_{query_id}_{rec['rank']}"):
-                                analytics_logger.log_feedback(query_id, rec['restaurant_name'], "dislike")
-                                st.toast("Feedback submitted! Thanks.")
-                        st.divider()
-                        
-            except Exception as e:
-                st.error(f"Something went wrong: {str(e)}")
+st.title("🍽️ Zomato AI Recommendations")
+st.markdown("Discover the best restaurants tailored specifically to your taste.")
 
-# =========================================================================
-# PAGE 2: ANALYTICS DASHBOARD
-# =========================================================================
-elif page == "📊 Analytics Dashboard":
-    st.title("📊 Zomato AI Analytics")
-    st.markdown("Monitor queries, latency, and user feedback to tune AI performance.")
+with st.form("preference_form"):
+    col1, col2 = st.columns(2)
+    with col1:
+        location = st.selectbox("📍 Select Location", metadata.get("locations", ["Bangalore"]))
+        budget_raw = st.slider("💰 Budget for two (₹)", min_value=200, max_value=4000, value=1000, step=100)
+    with col2:
+        cuisines_selection = st.selectbox("🍜 Preferred Cuisine", ["Any"] + metadata.get("cuisines", []))
+        min_rating = st.slider("⭐ Minimum Rating", min_value=0.0, max_value=5.0, value=4.0, step=0.1)
     
-    try:
-        conn = analytics_logger._get_connection()
-        queries_df = pd.read_sql("SELECT * FROM queries", conn)
-        feedback_df = pd.read_sql("SELECT * FROM feedback", conn)
-        conn.close()
-    except Exception as e:
-        st.error(f"Failed to load analytics DB: {e}")
-        st.stop()
-        
-    if queries_df.empty:
-        st.info("No data available yet.")
-        st.stop()
-        
-    total_queries = len(queries_df)
-    avg_latency = queries_df['latency_ms'].mean() / 1000.0
-    total_feedback = len(feedback_df)
-    likes = len(feedback_df[feedback_df['feedback_type'] == 'like'])
-    like_ratio = (likes / total_feedback * 100) if total_feedback > 0 else 0
+    optional_prefs = st.text_input("✨ Special requirements (e.g. Rooftop, Family friendly)", "Quick service")
+    top_n = st.selectbox("🏆 How many recommendations?", [3, 5, 10], index=1)
     
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total Queries", total_queries)
-    col2.metric("Avg Latency", f"{avg_latency:.2f}s")
-    col3.metric("Total Feedback", total_feedback)
-    col4.metric("Like Ratio", f"{like_ratio:.1f}%")
+    submitted = st.form_submit_button("Get AI Recommendations")
+
+if submitted:
+    # Convert budget to categories expected by engine
+    budget_str = "low" if budget_raw <= 600 else ("medium" if budget_raw <= 1500 else "high")
+    cuisine_list = [] if cuisines_selection == "Any" else [cuisines_selection]
+    opt_prefs_list = [p.strip() for p in optional_prefs.split(",") if p.strip()]
     
-    st.divider()
+    preferences = {
+        "location": location,
+        "budget": budget_str,
+        "cuisines": cuisine_list,
+        "min_rating": min_rating,
+        "optional_preferences": opt_prefs_list
+    }
     
-    colA, colB = st.columns(2)
-    with colA:
-        st.subheader("Recent Queries")
-        st.dataframe(queries_df[['timestamp', 'location', 'budget', 'num_recommendations']].tail(5))
-    
-    with colB:
-        st.subheader("Recent Feedback")
-        st.dataframe(feedback_df[['timestamp', 'restaurant_name', 'feedback_type']].tail(5))
+    with st.spinner("AI is analyzing restaurant data..."):
+        start_time = time.time()
+        try:
+            result = orchestrator.run_pipeline(preferences, top_n=top_n)
+            latency_ms = (time.time() - start_time) * 1000.0
+            
+            recs = result.get("recommendations", [])
+            query_id = analytics_logger.log_query(preferences, len(recs), latency_ms)
+            
+            st.success(f"Found {len(recs)} great matches for you!")
+            
+            for rec in recs:
+                with st.expander(f"**{rec['restaurant_name']}** — ⭐ {rec.get('rating', 'N/A')} — ₹{rec.get('cost_for_two', 'N/A')}", expanded=True):
+                    st.markdown(f"**Cuisine:** {rec.get('cuisine', 'Multi-cuisine')}")
+                    st.write(f"{rec.get('explanation', '')}")
+                    
+                    # Feedback Buttons
+                    c1, c2, c3 = st.columns([1, 1, 4])
+                    with c1:
+                        if st.button("👍", key=f"l_{query_id}_{rec['rank']}"):
+                            analytics_logger.log_feedback(query_id, rec['restaurant_name'], "like")
+                            st.toast("Liked!")
+                    with c2:
+                        if st.button("👎", key=f"d_{query_id}_{rec['rank']}"):
+                            analytics_logger.log_feedback(query_id, rec['restaurant_name'], "dislike")
+                            st.toast("Disliked")
+            
+            st.caption(f"Powered by Groq LLM | Results from {result.get('source', 'engine')}")
+                    
+        except Exception as e:
+            st.error("Something went wrong while processing your request. Please try again.")
+            st.exception(e) # Useful for the user to see the exact error in this phase
