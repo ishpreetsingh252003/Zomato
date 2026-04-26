@@ -89,4 +89,24 @@
 
 ## Suggested End-to-End Flow
 
-`Dataset -> Preprocessing -> User Preferences -> Candidate Filtering -> LLM Ranking -> Recommendation UI -> Feedback Loop`
+`Dataset -> Preprocessing -> User Preferences -> Candidate Filtering -> LLM Ranking -> Recommendation UI -> Feedback Loop -> Streamlit Deployment`
+
+### Phase 7: Deployment
+
+**Goal:** Make the application and dashboard accessible to end-users via Streamlit.
+
+- **Input:** Completed Phase 5 UI and Phase 6 Analytics codebase
+- **Processing:**
+  - Unify user-facing recommendation UI and analytics dashboard into a single multi-page Streamlit app
+  - Configure Streamlit Cloud branding (Zomato-red dark theme via `.streamlit/config.toml`)
+  - Bundle all dependencies in `requirements.txt` for one-click cloud deployment
+- **Output:** Live, publicly accessible Zomato AI Recommendation application
+- **Core Components:** Streamlit web host, deployment configurations (`requirements.txt`, `.streamlit/config.toml`)
+- **Architecture:**
+  - `app.py` — unified multi-page Streamlit app with sidebar navigation:
+    - **🔍 Find Restaurants** — preference form (location, budget slider, cuisine, rating), calls Phase 6 orchestrator, renders recommendation cards with 👍/👎 feedback buttons
+    - **📊 Analytics Dashboard** — real-time metrics (total queries, avg latency, like ratio), recent queries table, recent feedback table
+  - `analytics_logger.py` — SQLite telemetry logger (shared with Phase 6)
+  - `.streamlit/config.toml` — Zomato dark-mode theme (primary `#e23744`, background `#0d1117`)
+  - `requirements.txt` — pinned dependencies for Streamlit Cloud
+- **Implementation:** [`phase_7_deployment/`](phase_7_deployment/) — run `python -m streamlit run app.py` from that folder, then open `http://localhost:8501/`. Use the sidebar to switch between the recommendation UI and the analytics dashboard.

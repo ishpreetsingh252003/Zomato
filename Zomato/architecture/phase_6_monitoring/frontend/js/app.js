@@ -110,7 +110,7 @@ function formatCost(cost) {
 }
 
 // ── Render a single card ───────────────────────────────────────
-function renderCard(rec, delay) {
+function renderCard(rec, delay, queryId) {
   const rankClass = rec.rank === 1 ? 'rank-1' : rec.rank === 2 ? 'rank-2' : '';
   const card = document.createElement('article');
   card.className = 'rec-card';
@@ -145,8 +145,53 @@ function renderCard(rec, delay) {
       <span>🤖</span> Why recommended
     </div>
     <p class="card-explanation">${escHtml(rec.explanation || '')}</p>
+
+    <div class="card-feedback" data-query-id="${queryId || ''}" data-restaurant="${escHtml(rec.restaurant_name)}">
+      <button class="btn-feedback like" aria-label="Thumbs up" title="Good recommendation">👍</button>
+      <button class="btn-feedback dislike" aria-label="Thumbs down" title="Poor recommendation">👎</button>
+    </div>
   `;
+  
+  // Attach event listeners for feedback
+  const feedbackContainer = card.querySelector('.card-feedback');
+  const btnLike = feedbackContainer.querySelector('.like');
+  const btnDislike = feedbackContainer.querySelector('.dislike');
+  
+  btnLike.addEventListener('click', () => submitFeedback(queryId, rec.restaurant_name, 'like', btnLike, btnDislike));
+  btnDislike.addEventListener('click', () => submitFeedback(queryId, rec.restaurant_name, 'dislike', btnDislike, btnLike));
+  
   return card;
+}
+
+// ── Submit feedback to API ─────────────────────────────────────
+async function submitFeedback(queryId, restaurantName, type, clickedBtn, otherBtn) {
+  if (!queryId) return; // Sample data has no query_id
+
+  clickedBtn.classList.add('loading');
+  clickedBtn.disabled = true;
+  otherBtn.disabled = true;
+
+  try {
+    const res = await fetch('/api/analytics/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query_id: queryId,
+        restaurant_name: restaurantName,
+        feedback_type: type
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    
+    clickedBtn.classList.remove('loading');
+    clickedBtn.classList.add('selected');
+  } catch (err) {
+    console.error("Feedback error:", err);
+    clickedBtn.classList.remove('loading');
+    clickedBtn.disabled = false;
+    otherBtn.disabled = false;
+  }
 }
 
 // ── Escape HTML ────────────────────────────────────────────────
@@ -171,8 +216,9 @@ function renderResults(data) {
 
   // Cards
   cardsGrid.innerHTML = '';
+  const qId = data.query_id;
   data.recommendations.forEach((rec, i) => {
-    cardsGrid.appendChild(renderCard(rec, i * 80));
+    cardsGrid.appendChild(renderCard(rec, i * 80, qId));
   });
 
   setState('results');

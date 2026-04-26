@@ -570,6 +570,50 @@ select.field-input option {
   font-size: 0.87rem;
   color: var(--text-secondary);
   line-height: 1.55;
+  margin-bottom: 0.5rem;
+}
+
+.card-feedback {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.btn-feedback {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-feedback:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--text-muted);
+  transform: scale(1.05);
+}
+
+.btn-feedback:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.btn-feedback.selected {
+  background: var(--red);
+  border-color: var(--red);
+  color: white;
+}
+
+.btn-feedback:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-feedback.loading {
+  animation: pulse 1s infinite alternate;
 }
 
 /* ── Site Footer ─────────────────────────────────────────────── */
