@@ -1,0 +1,4 @@
+{"restaurant_name":"Pasta Point","location":"Bangalore","cuisine":"Italian, Continental","cost_for_two":1200,"rating":4.4,"extras":{"tags":"family-friendly quick-service"}}
+{"restaurant_name":"Dragon Wok","location":"Bangalore","cuisine":"Chinese, Thai","cost_for_two":800,"rating":4.2,"extras":{"tags":"quick-service"}}
+{"restaurant_name":"Budget Bites","location":"Bangalore","cuisine":"North Indian","cost_for_two":350,"rating":3.9,"extras":{"tags":"veg"}}
+{"restaurant_name":"Delhi Spice","location":"Delhi","cuisine":"North Indian, Mughlai","cost_for_two":1100,"rating":4.5,"extras":{"tags":"family-friendly"}}

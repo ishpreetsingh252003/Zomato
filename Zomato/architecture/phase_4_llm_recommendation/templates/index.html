@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phase 4 - Groq LLM Recommendation</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 64rem; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.35rem; }
+    label { display: block; margin-top: 0.8rem; font-weight: 600; }
+    input, textarea { width: 100%; margin-top: 0.3rem; padding: 0.55rem; box-sizing: border-box; }
+    textarea { min-height: 11rem; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    button { margin-top: 1rem; padding: 0.65rem 1rem; border: none; background: #e23744; color: #fff; border-radius: 6px; cursor: pointer; }
+    pre { background: #f7f7f7; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; overflow: auto; }
+    .error { background: #fee; border-color: #d33; }
+  </style>
+</head>
+<body>
+  <h1>Phase 4: LLM Reasoning and Recommendation (Groq)</h1>
+  <p>Provide Phase 3 shortlisted candidates + preferences. Ensure <code>GROQ_API_KEY</code> is set before running.</p>
+
+  <form method="post" action="{{ url_for('recommend') }}">
+    <label for="model">Groq model</label>
+    <input id="model" name="model" type="text" value="llama-3.3-70b-versatile" />
+
+    <label for="top_n">Top N recommendations</label>
+    <input id="top_n" name="top_n" type="number" min="1" value="5" />
+
+    <label for="preferences_json">Preferences JSON</label>
+    <textarea id="preferences_json" name="preferences_json">{{ default_preferences }}</textarea>
+
+    <label for="candidates_json">Candidates JSON</label>
+    <textarea id="candidates_json" name="candidates_json">{{ default_candidates }}</textarea>
+
+    <button type="submit">Generate Recommendations with Groq</button>
+  </form>
+
+  {% if error %}
+    <h2>Error</h2>
+    <pre class="error">{{ error }}</pre>
+  {% endif %}
+
+  {% if report %}
+    <h2>Run Report</h2>
+    <pre>{{ report }}</pre>
+  {% endif %}
+
+  {% if result %}
+    <h2>LLM Output</h2>
+    <pre>{{ result }}</pre>
+  {% endif %}
+</body>
+</html>

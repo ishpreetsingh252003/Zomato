@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phase 2 - Preference Capture</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 44rem; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.3rem; }
+    label { display: block; margin-top: 0.8rem; font-weight: 600; }
+    input, select, textarea { width: 100%; margin-top: 0.25rem; padding: 0.55rem; box-sizing: border-box; }
+    textarea { min-height: 4.2rem; }
+    button { margin-top: 1rem; padding: 0.65rem 1rem; border: none; background: #e23744; color: #fff; border-radius: 6px; cursor: pointer; }
+    pre { background: #f7f7f7; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; overflow: auto; }
+    .error { background: #fee; border-color: #d33; }
+  </style>
+</head>
+<body>
+  <h1>Phase 2: Preference Capture Layer</h1>
+  <p>Capture user intent and convert it into a validated structured preference object.</p>
+
+  <form method="post" action="{{ url_for('capture') }}">
+    <label for="location">Location</label>
+    <input id="location" name="location" type="text" placeholder="Delhi, Bangalore" required />
+
+    <label for="budget">Budget</label>
+    <select id="budget" name="budget">
+      <option value="low">Low</option>
+      <option value="medium" selected>Medium</option>
+      <option value="high">High</option>
+    </select>
+
+    <label for="cuisines">Cuisines (comma-separated)</label>
+    <input id="cuisines" name="cuisines" type="text" placeholder="Italian, Chinese" />
+
+    <label for="min_rating">Minimum rating (0 to 5)</label>
+    <input id="min_rating" name="min_rating" type="number" min="0" max="5" step="0.1" value="0" />
+
+    <label for="optional_preferences">Optional preferences (comma-separated)</label>
+    <input id="optional_preferences" name="optional_preferences" type="text" placeholder="family-friendly, quick-service" />
+
+    <label for="free_text">Additional free-text preferences</label>
+    <textarea id="free_text" name="free_text" placeholder="Any extra constraints..."></textarea>
+
+    <button type="submit">Capture Preferences</button>
+  </form>
+
+  {% if error %}
+    <h2>Error</h2>
+    <pre class="error">{{ error }}</pre>
+  {% endif %}
+
+  {% if result %}
+    <h2>Structured Preference Object</h2>
+    <pre>{{ result }}</pre>
+  {% endif %}
+
+  {% if report %}
+    <h2>Normalization Report</h2>
+    <pre>{{ report }}</pre>
+  {% endif %}
+</body>
+</html>

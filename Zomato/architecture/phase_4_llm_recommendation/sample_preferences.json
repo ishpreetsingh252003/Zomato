@@ -1,0 +1,7 @@
+{
+  "location": "Bangalore",
+  "budget": "medium",
+  "cuisines": ["Italian", "Chinese"],
+  "min_rating": 4.0,
+  "optional_preferences": ["quick-service"]
+}

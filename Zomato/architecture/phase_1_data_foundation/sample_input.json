@@ -1,0 +1,13 @@
+[
+  {
+    "Restaurant Name": "Test Diner",
+    "City": "Bangalore",
+    "Cuisines": "Chinese, north indian",
+    "Aggregate rating": "4.2/5",
+    "Average Cost for two": "Rs. 800"
+  },
+  {
+    "name": "Incomplete Row",
+    "City": "Delhi"
+  }
+]
