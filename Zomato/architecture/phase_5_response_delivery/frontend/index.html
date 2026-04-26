@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zomato AI — Restaurant Recommendations</title>
+  <meta name="description" content="AI-powered personalised restaurant recommendations. Tell us your preferences and get ranked picks with natural-language explanations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🍽</span>
+        <span class="logo-text">Zomato <span class="logo-ai">AI</span></span>
+      </div>
+      <p class="header-tagline">LLM-powered restaurant recommendations</p>
+    </div>
+    <div class="header-glow"></div>
+  </header>
+
+  <!-- ── HERO ───────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-inner">
+      <h1 class="hero-title">Find your perfect restaurant</h1>
+      <p class="hero-sub">
+        Describe your preferences and our AI ranks the best options with clear,
+        personalised explanations — not just a list of stars.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── MAIN LAYOUT ────────────────────────────────────────────────────── -->
+  <main class="app-layout">
+
+    <!-- PREFERENCE FORM -->
+    <aside class="pref-panel" id="pref-panel">
+      <h2 class="panel-title">Your Preferences</h2>
+
+      <form id="pref-form" novalidate>
+
+        <div class="field-group">
+          <label for="location" class="field-label">
+            <span class="field-icon">📍</span> Location
+          </label>
+          <input
+            id="location"
+            name="location"
+            type="text"
+            class="field-input"
+            placeholder="e.g. Bangalore"
+            value="Bangalore"
+            required
+          />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">
+            <span class="field-icon">💰</span> Budget
+          </label>
+          <div class="budget-tabs" id="budget-tabs" role="group" aria-label="Budget">
+            <button type="button" class="budget-tab" data-value="low">Low</button>
+            <button type="button" class="budget-tab active" data-value="medium">Medium</button>
+            <button type="button" class="budget-tab" data-value="high">High</button>
+          </div>
+          <input type="hidden" id="budget" name="budget" value="medium" />
+        </div>
+
+        <div class="field-group">
+          <label for="cuisines" class="field-label">
+            <span class="field-icon">🍜</span> Cuisines
+            <span class="field-hint">comma-separated</span>
+          </label>
+          <input
+            id="cuisines"
+            name="cuisines"
+            type="text"
+            class="field-input"
+            placeholder="e.g. Italian, Chinese"
+            value="Italian, Chinese"
+          />
+        </div>
+
+        <div class="field-group">
+          <label for="min-rating" class="field-label">
+            <span class="field-icon">⭐</span> Min Rating
+            <span class="field-hint" id="rating-display">4.0</span>
+          </label>
+          <input
+            id="min-rating"
+            name="min_rating"
+            type="range"
+            class="rating-slider"
+            min="0" max="5" step="0.5"
+            value="4.0"
+          />
+          <div class="slider-labels">
+            <span>0</span><span>2.5</span><span>5</span>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="optional-prefs" class="field-label">
+            <span class="field-icon">✨</span> Optional Preferences
+            <span class="field-hint">comma-separated</span>
+          </label>
+          <input
+            id="optional-prefs"
+            name="optional_preferences"
+            type="text"
+            class="field-input"
+            placeholder="e.g. quick-service, family-friendly"
+            value="quick-service"
+          />
+        </div>
+
+        <div class="field-group">
+          <label for="top-n" class="field-label">
+            <span class="field-icon">🏆</span> Top N results
+          </label>
+          <input
+            id="top-n"
+            name="top_n"
+            type="number"
+            class="field-input"
+            min="1" max="10"
+            value="5"
+          />
+        </div>
+
+        <button type="submit" class="btn-recommend" id="btn-recommend">
+          <span class="btn-text">Get Recommendations</span>
+          <span class="btn-icon">→</span>
+        </button>
+
+        <button type="button" class="btn-sample" id="btn-sample">
+          Try with sample data
+        </button>
+
+      </form>
+    </aside>
+
+    <!-- RESULTS PANEL -->
+    <section class="results-panel" id="results-panel">
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">🤖</div>
+        <h3>Ready when you are</h3>
+        <p>Fill in your preferences and click <strong>Get Recommendations</strong> to see AI-ranked restaurants with detailed explanations.</p>
+      </div>
+
+      <!-- Loading skeletons -->
+      <div class="skeletons" id="skeletons" hidden>
+        <div class="skeleton-summary"></div>
+        <div class="cards-grid">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+
+      <!-- Error banner -->
+      <div class="error-banner" id="error-banner" hidden role="alert">
+        <span class="error-icon">⚠️</span>
+        <div>
+          <strong>Something went wrong</strong>
+          <p id="error-message"></p>
+        </div>
+        <button class="error-dismiss" id="error-dismiss" aria-label="Dismiss">✕</button>
+      </div>
+
+      <!-- Results -->
+      <div class="results-content" id="results-content" hidden>
+        <div class="results-header">
+          <div>
+            <h2 class="results-title" id="results-title">Recommendations</h2>
+            <p class="results-summary" id="results-summary"></p>
+          </div>
+          <div class="results-meta">
+            <span class="source-badge" id="source-badge"></span>
+            <button class="btn-refresh" id="btn-refresh" title="Re-run with same preferences">
+              ↻ Refresh
+            </button>
+          </div>
+        </div>
+        <div class="cards-grid" id="cards-grid"></div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <p>Phase 5 · Zomato AI Recommendation System · Powered by <strong>Groq LLM</strong> + <strong>Flask</strong></p>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

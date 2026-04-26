@@ -64,6 +64,16 @@
   - Support refresh/re-query with changed preferences
 - **Output:** User-facing recommendation screen/API response
 - **Core Components:** Frontend display layer, API response handler, UX formatter
+- **Architecture:**
+  - **Backend** — Flask REST API (`backend/app.py`, `backend/api.py`, `backend/orchestrator.py`):
+    - `POST /api/recommend` — accepts user preferences, runs Phase 3 → Phase 4 pipeline, returns ranked recommendations
+    - `GET /api/health` — health check
+    - `GET /api/sample` — returns pre-built sample recommendations (no Groq key needed)
+  - **Frontend** — premium dark-mode SPA (`frontend/`):
+    - `frontend/index.html` — preference form, recommendation cards grid, skeleton loaders, error states
+    - `frontend/css/styles.css` — glassmorphism design system with Zomato-red accent, micro-animations
+    - `frontend/js/app.js` — async form submission, card rendering, star ratings, refresh/re-query
+- **Implementation:** [`phase_5_response_delivery/`](phase_5_response_delivery/) — run `python __main__.py` from that folder (installs from `requirements.txt`), then open `http://127.0.0.1:5004/`. Click **Try with sample data** to demo without a Groq key, or fill in preferences and click **Get Recommendations** to run the live AI pipeline.
 
 ### Phase 6: Monitoring and Continuous Improvement
 

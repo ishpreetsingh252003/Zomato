@@ -1,0 +1,52 @@
+{
+  "summary": "Based on your preferences for Italian and Chinese cuisine in Bangalore with a medium budget and minimum 4.0 rating, here are the top recommendations.",
+  "recommendations": [
+    {
+      "rank": 1,
+      "restaurant_name": "Pasta Point",
+      "explanation": "Pasta Point is an excellent match — it specialises in Italian and Continental cuisine, which aligns perfectly with your Italian preference. With a 4.4 rating and a cost for two at ₹1,200, it fits comfortably within your medium budget. Quick service is available, making it ideal for a fast, quality meal.",
+      "rating": 4.4,
+      "cost_for_two": 1200,
+      "cuisine": "Italian, Continental"
+    },
+    {
+      "rank": 2,
+      "restaurant_name": "Dragon Wok",
+      "explanation": "Dragon Wok serves Chinese and Thai food, directly matching your Chinese cuisine preference. At ₹800 for two, it's very affordable for a medium budget. The 4.2 rating ensures quality, and the restaurant is known for quick service.",
+      "rating": 4.2,
+      "cost_for_two": 800,
+      "cuisine": "Chinese, Thai"
+    },
+    {
+      "rank": 3,
+      "restaurant_name": "Spice Garden",
+      "explanation": "Spice Garden offers a delightful fusion of Chinese and Indian flavours. Rated 4.5 with a cost for two at ₹1,100, it provides excellent value within your budget. The family-friendly atmosphere and fast kitchen make it a strong contender.",
+      "rating": 4.5,
+      "cost_for_two": 1100,
+      "cuisine": "Chinese, Indian"
+    },
+    {
+      "rank": 4,
+      "restaurant_name": "Trattoria Milano",
+      "explanation": "This authentic Italian restaurant boasts a 4.3 rating and offers a range of pastas, risottos, and wood-fired pizzas. At ₹1,400 for two it sits near the upper end of medium budget but delivers a premium dining experience.",
+      "rating": 4.3,
+      "cost_for_two": 1400,
+      "cuisine": "Italian"
+    },
+    {
+      "rank": 5,
+      "restaurant_name": "Wok & Roll",
+      "explanation": "Wok & Roll combines Chinese and Pan-Asian cuisine with a modern twist. With a 4.1 rating and ₹900 for two, it's budget-friendly and offers generous portions. Ideal for a casual yet flavourful meal.",
+      "rating": 4.1,
+      "cost_for_two": 900,
+      "cuisine": "Chinese, Pan-Asian"
+    }
+  ],
+  "preferences_used": {
+    "location": "Bangalore",
+    "budget": "medium",
+    "cuisines": ["Italian", "Chinese"],
+    "min_rating": 4.0,
+    "optional_preferences": ["quick-service"]
+  }
+}
