@@ -3,4 +3,5 @@
 __pycache__/
 *.pyc
 .DS_Store
-metadata.json
+# metadata.json removed from ignore to allow cloud deployment
+
