@@ -135,6 +135,7 @@ def run_pipeline(preferences: dict[str, Any], top_n: int = 5) -> dict[str, Any]:
 
     run_phase3 = None
     load_restaurants_from_jsonl = None
+    RestaurantRecord = None
     try:
         p3_dir = str(_ARCH_DIR / "phase_3_candidate_retrieval")
         if p3_dir in sys.path:
@@ -151,6 +152,15 @@ def run_pipeline(preferences: dict[str, Any], top_n: int = 5) -> dict[str, Any]:
 
         run_phase3 = mod_pipe.run_phase3
         load_restaurants_from_jsonl = mod_pipe.load_restaurants_from_jsonl
+
+        spec_s3 = _ilu.spec_from_file_location(
+            "phase_3_schema",
+            _ARCH_DIR / "phase_3_candidate_retrieval" / "schema.py",
+        )
+        mod_s3 = _ilu.module_from_spec(spec_s3)  # type: ignore[arg-type]
+        sys.modules["phase_3_schema"] = mod_s3
+        spec_s3.loader.exec_module(mod_s3)  # type: ignore[union-attr]
+        RestaurantRecord = mod_s3.RestaurantRecord
     except Exception as e:
         print(f"Phase 3 import failed: {e}")
         traceback.print_exc()
@@ -163,18 +173,19 @@ def run_pipeline(preferences: dict[str, Any], top_n: int = 5) -> dict[str, Any]:
     print(f"Loading restaurants for location: {loc}")
     print(f"Found {len(raw_records)} records")
 
-    if not raw_records or run_phase3 is None:
+    if not raw_records or run_phase3 is None or RestaurantRecord is None:
         sample = _load_sample_recommendations()
         sample["preferences_used"] = preferences
         return sample
 
     # ---- Phase 3: filter + rank (with deduplication) -----------------------
     try:
-        # Load restaurants from the full dataset and run Phase 3 with deduplication
+        # Load restaurants from the full dataset if available, otherwise use raw_records
         dataset_path = _resolve_phase1_dataset_path()
-        if dataset_path is None:
-            raise FileNotFoundError("No Phase 1 JSONL dataset found in phase_1_data_foundation/output")
-        restaurants = load_restaurants_from_jsonl(str(dataset_path))
+        if dataset_path is not None:
+            restaurants = load_restaurants_from_jsonl(str(dataset_path))
+        else:
+            restaurants = [RestaurantRecord.model_validate(r) for r in raw_records]
         candidates, report = run_phase3(restaurants, preferences, top_n=top_n * 3)
         
         # Debug: print what we got
