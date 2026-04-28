@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from schema import LLMResponse
 
 
-DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_GROQ_MODEL = "llama-3.1-8b-instant"
 load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 
 

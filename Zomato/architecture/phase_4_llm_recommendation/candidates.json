@@ -1,0 +1,29 @@
+[
+  {
+    "restaurant_name": "Ruh's Cafe",
+    "location": "Btm",
+    "cuisine": "Cafe, American, Italian, Continental, Chinese",
+    "rating": 4.1,
+    "cost_for_two": null,
+    "score": 72.8,
+    "match_reasons": ["cuisine match: chinese, italian", "rating 4.1"]
+  },
+  {
+    "restaurant_name": "On The Nose",
+    "location": "Btm", 
+    "cuisine": "Cafe, Italian, Mexican, Chinese",
+    "rating": 3.8,
+    "cost_for_two": null,
+    "score": 70.4,
+    "match_reasons": ["cuisine match: chinese, italian", "rating 3.8"]
+  },
+  {
+    "restaurant_name": "Pin Me Down",
+    "location": "Btm",
+    "cuisine": "Continental, Mexican, Chinese, North Indian",
+    "rating": 4.5,
+    "cost_for_two": null,
+    "score": 56.0,
+    "match_reasons": ["cuisine match: chinese", "rating 4.5"]
+  }
+]

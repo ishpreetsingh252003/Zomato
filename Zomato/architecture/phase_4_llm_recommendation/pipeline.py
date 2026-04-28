@@ -30,7 +30,7 @@ def run_phase4(
     preferences: PreferencesInput,
     candidates: list[CandidateInput],
     top_n: int = 5,
-    model: str = "llama-3.1-70b-versatile",
+    model: str = "llama-3.1-8b-instant",
 ) -> tuple[LLMResponse, dict[str, Any]]:
     prompt = build_prompt(preferences, candidates, top_n=top_n)
     response = call_groq_json(prompt, model=model)

@@ -1,0 +1,8 @@
+{
+  "location": "Btm",
+  "budget": "medium",
+  "cuisines": ["Italian", "Chinese"],
+  "min_rating": 3.5,
+  "optional_preferences": [],
+  "free_text": ""
+}
