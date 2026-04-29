@@ -1,4 +1,30 @@
-{"restaurant_name":"Pasta Point","location":"Bangalore","cuisine":"Italian, Continental","cost_for_two":1200,"rating":4.4,"extras":{"tags":"family-friendly quick-service"}}
-{"restaurant_name":"Dragon Wok","location":"Bangalore","cuisine":"Chinese, Thai","cost_for_two":800,"rating":4.2,"extras":{"tags":"quick-service"}}
-{"restaurant_name":"Budget Bites","location":"Bangalore","cuisine":"North Indian","cost_for_two":350,"rating":3.9,"extras":{"tags":"veg"}}
-{"restaurant_name":"Delhi Spice","location":"Delhi","cuisine":"North Indian, Mughlai","cost_for_two":1100,"rating":4.5,"extras":{"tags":"family-friendly"}}
+{"restaurant_name":"Pasta Point","location":"Indiranagar","cuisine":"Italian, Continental","cost_for_two":1200,"rating":4.4,"extras":{"tags":"family-friendly quick-service"}}
+{"restaurant_name":"Dragon Wok","location":"Koramangala","cuisine":"Chinese, Thai","cost_for_two":800,"rating":4.2,"extras":{"tags":"quick-service"}}
+{"restaurant_name":"Budget Bites","location":"Whitefield","cuisine":"North Indian","cost_for_two":350,"rating":3.9,"extras":{"tags":"veg"}}
+{"restaurant_name":"Delhi Spice","location":"Jayanagar","cuisine":"North Indian, Mughlai","cost_for_two":1100,"rating":4.5,"extras":{"tags":"family-friendly"}}
+{"restaurant_name":"Trattoria Milano","location":"Koramangala 5Th Block","cuisine":"Italian","cost_for_two":1400,"rating":4.3,"extras":{"tags":"rooftop date-night"}}
+{"restaurant_name":"Wok & Roll","location":"Indiranagar","cuisine":"Chinese, Pan Asian","cost_for_two":900,"rating":4.1,"extras":{"tags":"quick-service"}}
+{"restaurant_name":"Spice Garden","location":"Whitefield","cuisine":"Chinese, Indian","cost_for_two":1100,"rating":4.5,"extras":{"tags":"family-friendly buffet"}}
+{"restaurant_name":"Biryani House","location":"Koramangala","cuisine":"Biryani, Hyderabadi","cost_for_two":650,"rating":4.6,"extras":{"tags":"spicy delivery"}}
+{"restaurant_name":"The Burger Joint","location":"Indiranagar","cuisine":"Burger, Fast Food","cost_for_two":500,"rating":4.0,"extras":{"tags":"quick-service outdoor-seating"}}
+{"restaurant_name":"Sushi Central","location":"Koramangala","cuisine":"Japanese, Sushi","cost_for_two":1800,"rating":4.7,"extras":{"tags":"date-night fine-dining"}}
+{"restaurant_name":"South Indian Cafe","location":"Jayanagar","cuisine":"South Indian","cost_for_two":400,"rating":4.3,"extras":{"tags":"veg breakfast"}}
+{"restaurant_name":"Punjab Grill","location":"Whitefield","cuisine":"North Indian, Kebab","cost_for_two":1500,"rating":4.4,"extras":{"tags":"family-friendly dinner"}}
+{"restaurant_name":"Mediterranean Oasis","location":"Indiranagar","cuisine":"Mediterranean, Lebanese","cost_for_two":1300,"rating":4.2,"extras":{"tags":"healthy outdoor-seating"}}
+{"restaurant_name":"Taco Fiesta","location":"Koramangala","cuisine":"Mexican, Tex-Mex","cost_for_two":700,"rating":3.8,"extras":{"tags":"quick-service drinks"}}
+{"restaurant_name":"Kerala Kitchen","location":"Jayanagar","cuisine":"Kerala, Seafood","cost_for_two":850,"rating":4.5,"extras":{"tags":"spicy family-friendly"}}
+{"restaurant_name":"French Bakery","location":"Whitefield","cuisine":"Bakery, Desserts","cost_for_two":600,"rating":4.1,"extras":{"tags":"breakfast cafe wifi"}}
+{"restaurant_name":"Thai Basil","location":"Indiranagar","cuisine":"Thai, Asian","cost_for_two":950,"rating":4.3,"extras":{"tags":"date-night spicy"}}
+{"restaurant_name":"Barbeque Nation","location":"Koramangala","cuisine":"Bbq, Grill","cost_for_two":1600,"rating":4.5,"extras":{"tags":"buffet family-friendly"}}
+{"restaurant_name":"Gujarati Thali","location":"Jayanagar","cuisine":"Gujarati","cost_for_two":450,"rating":4.0,"extras":{"tags":"veg unlimited-thali"}}
+{"restaurant_name":"Seafood Bay","location":"Whitefield","cuisine":"Seafood, Goan","cost_for_two":1200,"rating":4.6,"extras":{"tags":"fresh-catch dinner"}}
+{"restaurant_name":"Coffee Republic","location":"Indiranagar","cuisine":"Cafe, Coffee","cost_for_two":300,"rating":4.2,"extras":{"tags":"wifi laptop-friendly"}}
+{"restaurant_name":"Momos Corner","location":"Koramangala","cuisine":"Tibetan, Momos","cost_for_two":350,"rating":3.9,"extras":{"tags":"quick-service street-food"}}
+{"restaurant_name":"Rajasthani Dhaba","location":"Jayanagar","cuisine":"Rajasthani","cost_for_two":550,"rating":4.1,"extras":{"tags":"veg traditional"}}
+{"restaurant_name":"Continental Club","location":"Whitefield","cuisine":"Continental, European","cost_for_two":1700,"rating":4.4,"extras":{"tags":"rooftop bar date-night"}}
+{"restaurant_name":"Andhra Spice","location":"Indiranagar","cuisine":"Andhra, Biryani","cost_for_two":700,"rating":4.3,"extras":{"tags":"spicy family-friendly"}}
+{"restaurant_name":"Pizza Hut","location":"Koramangala","cuisine":"Pizza, Italian","cost_for_two":800,"rating":3.7,"extras":{"tags":"delivery quick-service"}}
+{"restaurant_name":"Bengali Kitchen","location":"Jayanagar","cuisine":"Bengali, Seafood","cost_for_two":750,"rating":4.2,"extras":{"tags":"fish-curry traditional"}}
+{"restaurant_name":"Ice Cream Parlour","location":"Whitefield","cuisine":"Ice Cream, Desserts","cost_for_two":400,"rating":4.0,"extras":{"tags":"family-friendly kids"}}
+{"restaurant_name":"Kebab Palace","location":"Indiranagar","cuisine":"Kebab, Mughlai","cost_for_two":1000,"rating":4.5,"extras":{"tags":"dinner late-night"}}
+{"restaurant_name":"Healthy Bowl","location":"Koramangala","cuisine":"Healthy Food, Salad","cost_for_two":650,"rating":4.1,"extras":{"tags":"vegan gluten-free"}}

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 import json
 from pathlib import Path
 from typing import Any
@@ -12,7 +13,9 @@ from schema import Candidate, RestaurantRecord, UserPreferences
 
 def load_restaurants_from_jsonl(path: str | Path) -> list[RestaurantRecord]:
     rows: list[RestaurantRecord] = []
-    with Path(path).open("r", encoding="utf-8") as f:
+    p = Path(path)
+    opener = gzip.open if p.suffix == ".gz" else p.open
+    with opener(p, "rt", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:

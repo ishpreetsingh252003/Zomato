@@ -25,26 +25,36 @@ def _resolve_phase1_dataset_path() -> Path | None:
     Resolve the best available Phase 1 JSONL dataset file.
     Priority:
     1) phase1_live.jsonl (legacy expected name)
-    2) newest phase1_*.jsonl in phase_1_data_foundation/output
+    2) phase1_live.jsonl.gz (compressed for cloud deployment)
+    3) newest phase1_*.jsonl in phase_1_data_foundation/output
+    4) newest phase1_*.jsonl.gz in phase_1_data_foundation/output
     """
     output_dir = _ARCH_DIR / "phase_1_data_foundation" / "output"
     preferred = output_dir / "phase1_live.jsonl"
     if preferred.exists():
         return preferred
+    preferred_gz = output_dir / "phase1_live.jsonl.gz"
+    if preferred_gz.exists():
+        return preferred_gz
     candidates = sorted(output_dir.glob("phase1*.jsonl"), key=lambda p: p.stat().st_mtime, reverse=True)
     if candidates:
         return candidates[0]
+    candidates_gz = sorted(output_dir.glob("phase1*.jsonl.gz"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if candidates_gz:
+        return candidates_gz[0]
     return None
 
 
 def _load_restaurants(location: str | None = None) -> list[dict]:
     """Load restaurants from full dataset if available, else sample data."""
+    import gzip
     # Try the full dataset first
     live_p = _resolve_phase1_dataset_path()
     if live_p and live_p.exists():
         records = []
         
-        with open(live_p, "r", encoding="utf-8") as f:
+        opener = gzip.open if str(live_p).endswith(".gz") else open
+        with opener(live_p, "rt", encoding="utf-8") as f:
             for line in f:
                 records.append(json.loads(line))
         
