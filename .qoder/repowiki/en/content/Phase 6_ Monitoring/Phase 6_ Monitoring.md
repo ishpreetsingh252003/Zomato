@@ -14,6 +14,13 @@
 - [app.js](file://architecture/phase_6_monitoring/frontend/js/app.js)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Enhanced backend orchestration with gzip support for dataset resolution and loading capabilities
+- Updated dataset loading logic to handle compressed (.gz) files transparently
+- Improved dataset discovery priority with compressed file support
+- Added gzip compression handling in restaurant data loading pipeline
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
@@ -29,10 +36,12 @@
 ## Introduction
 Phase 6 Monitoring establishes a lightweight analytics and observability layer for the recommendation system. It captures user query logs, tracks performance metrics (latency), collects explicit feedback, persists data locally, and exposes a Streamlit-based dashboard for insights. The monitoring stack integrates seamlessly with the recommendation pipeline and frontend, enabling continuous improvement by surfacing trends, problematic recommendations, and system performance indicators.
 
+**Updated** Enhanced backend orchestration now supports gzip-compressed dataset files for improved cloud deployment efficiency and reduced storage costs.
+
 ## Project Structure
 The monitoring subsystem is organized into three primary areas:
 - Backend analytics logger and API: persistent storage, ingestion, and analytics endpoints
-- Orchestrator and API integration: pipeline orchestration and analytics hooks
+- Orchestrator and API integration: pipeline orchestration and analytics hooks with gzip dataset support
 - Dashboard: real-time visualization of queries, feedback, and trends
 - Frontend: user-driven feedback submission and query initiation
 
@@ -75,19 +84,21 @@ DASH --> LOG
 - API Layer: Exposes endpoints for health checks, sample data, metadata, recommendation runs, and feedback submission. Integrates analytics logging during recommendation requests.
 - Dashboard: Reads analytics data from SQLite and renders overview metrics, trend charts, problematic recommendations, and recent queries.
 - Frontend: Submits feedback via a dedicated endpoint and injects the returned query_id into results for traceability.
-- Orchestrator: Executes the recommendation pipeline and returns results; latency is measured around the pipeline execution.
+- Orchestrator: Executes the recommendation pipeline with enhanced gzip dataset support and returns results; latency is measured around the pipeline execution.
 
 Key responsibilities:
 - Data collection: queries and feedback persisted to a local SQLite database
 - Performance tracking: latency_ms captured per recommendation request
 - Feedback collection: explicit likes/dislikes per recommendation
 - Dashboard: overview metrics, temporal trends, and actionable insights
+- Dataset handling: transparent support for compressed and uncompressed dataset files
 
 **Section sources**
 - [analytics_logger.py:13-87](file://architecture/phase_6_monitoring/backend/analytics_logger.py#L13-L87)
 - [api.py:43-96](file://architecture/phase_6_monitoring/backend/api.py#L43-L96)
 - [dashboard.py:23-102](file://architecture/phase_6_monitoring/dashboard/dashboard.py#L23-L102)
 - [app.js:167-195](file://architecture/phase_6_monitoring/frontend/js/app.js#L167-L195)
+- [orchestrator.py:23-92](file://architecture/phase_6_monitoring/backend/orchestrator.py#L23-L92)
 
 ## Architecture Overview
 The monitoring architecture follows a simple, cohesive pattern:
@@ -233,9 +244,11 @@ API-->>UI : success
 ### Orchestrator and Pipeline Timing
 The orchestrator executes the recommendation pipeline and returns results. The API measures latency around this call and passes it to the analytics logger along with the number of recommendations.
 
+**Updated** Enhanced dataset loading with gzip compression support for improved cloud deployment efficiency.
+
 ```mermaid
 flowchart TD
-Start(["Start Pipeline"]) --> LoadData["Load restaurants"]
+Start(["Start Pipeline"]) --> LoadData["Load restaurants with gzip support"]
 LoadData --> Phase3["Apply filters and rank"]
 Phase3 --> Phase4["LLM ranking (if available)"]
 Phase4 --> Return["Return recommendations"]
@@ -248,11 +261,31 @@ Phase4 --> Return["Return recommendations"]
 - [orchestrator.py:77-228](file://architecture/phase_6_monitoring/backend/orchestrator.py#L77-L228)
 - [api.py:82-88](file://architecture/phase_6_monitoring/backend/api.py#L82-L88)
 
+### Enhanced Dataset Resolution with Gzip Support
+**New Section** The orchestrator now supports both compressed and uncompressed dataset files transparently.
+
+Dataset resolution priority:
+1. phase1_live.jsonl (legacy expected name)
+2. **phase1_live.jsonl.gz (compressed for cloud deployment)**
+3. newest phase1_*.jsonl in phase_1_data_foundation/output
+4. **newest phase1_*.jsonl.gz in phase_1_data_foundation/output**
+
+Dataset loading logic:
+- Automatic detection of .gz files using file extension checking
+- Transparent gzip decompression using Python's gzip.open() when .gz files are detected
+- Fallback to standard file opening for uncompressed files
+- Consistent data processing regardless of compression format
+
+**Section sources**
+- [orchestrator.py:23-45](file://architecture/phase_6_monitoring/backend/orchestrator.py#L23-L45)
+- [orchestrator.py:48-92](file://architecture/phase_6_monitoring/backend/orchestrator.py#L48-L92)
+
 ## Dependency Analysis
 - Frontend depends on backend endpoints for metadata, recommendations, and feedback
 - API depends on the orchestrator for recommendation execution and on the analytics logger for logging
 - Dashboard depends on the analytics database for visualization
 - Analytics logger depends on SQLite for persistence
+- Orchestrator depends on dataset files (compressed or uncompressed) for recommendation data
 
 ```mermaid
 graph LR
@@ -260,6 +293,7 @@ FE["frontend/js/app.js"] --> API["backend/api.py"]
 API --> ORCH["backend/orchestrator.py"]
 API --> LOG["backend/analytics_logger.py"]
 DASH["dashboard/dashboard.py"] --> LOG
+ORCH --> DATASET["Dataset Files (.jsonl/.gz)"]
 ```
 
 **Diagram sources**
@@ -267,6 +301,7 @@ DASH["dashboard/dashboard.py"] --> LOG
 - [api.py:82-91](file://architecture/phase_6_monitoring/backend/api.py#L82-L91)
 - [analytics_logger.py:46-83](file://architecture/phase_6_monitoring/backend/analytics_logger.py#L46-L83)
 - [dashboard.py:23-30](file://architecture/phase_6_monitoring/dashboard/dashboard.py#L23-L30)
+- [orchestrator.py:48-92](file://architecture/phase_6_monitoring/backend/orchestrator.py#L48-L92)
 
 **Section sources**
 - [app.py:23-25](file://architecture/phase_6_monitoring/backend/app.py#L23-L25)
@@ -278,13 +313,15 @@ DASH["dashboard/dashboard.py"] --> LOG
 - Lightweight storage: SQLite is used for simplicity and minimal overhead; suitable for development and small-scale deployments.
 - Query volume: Dashboard aggregates hourly query counts; this helps identify traffic spikes and tuning needs.
 - Feedback ratio: The dashboard computes like/dislike ratios to gauge user satisfaction trends.
+- **Gzip compression benefits**: Reduced storage footprint and faster network transfer for cloud deployments
+- **Transparent decompression**: No performance penalty for gzip files as decompression happens during file access
 
 Practical tips:
 - Monitor average latency and feedback ratios over time to detect regressions
 - Use dashboard insights to guide improvements in filtering and prompting
-- Consider indexing strategies if scaling beyond development usage
-
-[No sources needed since this section provides general guidance]
+- Consider gzip compression for large dataset files in cloud environments
+- Monitor dataset loading performance when switching between compressed and uncompressed files
+- Use dashboard trends to identify optimal dataset formats for different deployment scenarios
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -292,6 +329,8 @@ Common issues and resolutions:
 - Missing query_id: Feedback submission requires a valid query_id. Verify that the recommendation response includes query_id and that the frontend attaches it to feedback events.
 - Validation errors: The API validates request bodies and feedback types. Ensure requests conform to expected shapes and feedback_type is either like or dislike.
 - Metadata loading failures: The frontend attempts to load locations and cuisines from the metadata endpoint. Confirm the endpoint is reachable and returns valid JSON.
+- **Dataset loading issues**: If dataset files are not loading, verify that the files exist in the expected locations and have proper read permissions. Check both .jsonl and .gz variants.
+- **Gzip decompression errors**: Ensure gzip-compressed files are valid and not corrupted. Test decompression manually if dataset loading fails.
 
 **Section sources**
 - [dashboard.py:12-15](file://architecture/phase_6_monitoring/dashboard/dashboard.py#L12-L15)
@@ -302,7 +341,7 @@ Common issues and resolutions:
 ## Conclusion
 Phase 6 Monitoring provides a practical foundation for observability and continuous improvement. By capturing query logs, performance metrics, and explicit feedback, and visualizing trends through a simple dashboard, teams can iteratively refine filtering and prompting logic. The modular design allows easy extension for additional metrics, richer dashboards, or migration to centralized analytics backends as the system scales.
 
-[No sources needed since this section summarizes without analyzing specific files]
+**Updated** The enhanced backend orchestration with gzip support further strengthens the monitoring infrastructure by improving dataset handling efficiency and supporting modern cloud deployment practices.
 
 ## Appendices
 
@@ -319,6 +358,9 @@ Phase 6 Monitoring provides a practical foundation for observability and continu
 - Frontend parameters
   - Metadata endpoints: Used to populate location and cuisine dropdowns.
   - Feedback submission: Uses the injected query_id to associate feedback with the original query.
+- **Dataset configuration**
+  - **Priority resolution**: Supports both .jsonl and .gz dataset formats with automatic detection
+  - **Compression transparency**: No code changes required when switching between compressed and uncompressed datasets
 
 **Section sources**
 - [analytics_logger.py:7-86](file://architecture/phase_6_monitoring/backend/analytics_logger.py#L7-L86)
@@ -326,6 +368,7 @@ Phase 6 Monitoring provides a practical foundation for observability and continu
 - [api.py:97-119](file://architecture/phase_6_monitoring/backend/api.py#L97-L119)
 - [dashboard.py:7-15](file://architecture/phase_6_monitoring/dashboard/dashboard.py#L7-L15)
 - [app.js:294-324](file://architecture/phase_6_monitoring/frontend/js/app.js#L294-L324)
+- [orchestrator.py:23-45](file://architecture/phase_6_monitoring/backend/orchestrator.py#L23-L45)
 
 ### Data Model and Relationships
 ```mermaid
@@ -367,8 +410,14 @@ QUERIES ||--o{ FEEDBACK : "referenced by"
 - Dashboard rendering
   - The dashboard connects to the analytics database, loads queries and feedback, computes metrics, and renders charts and tables.
 
+**Updated** Dataset loading workflow with gzip support:
+- The orchestrator automatically detects available dataset files in priority order
+- Compressed .gz files are transparently decompressed during loading
+- Both compressed and uncompressed datasets produce identical data structures for downstream processing
+
 **Section sources**
 - [api.py:82-91](file://architecture/phase_6_monitoring/backend/api.py#L82-L91)
 - [analytics_logger.py:46-83](file://architecture/phase_6_monitoring/backend/analytics_logger.py#L46-L83)
 - [app.js:167-195](file://architecture/phase_6_monitoring/frontend/js/app.js#L167-L195)
 - [dashboard.py:23-102](file://architecture/phase_6_monitoring/dashboard/dashboard.py#L23-L102)
+- [orchestrator.py:23-92](file://architecture/phase_6_monitoring/backend/orchestrator.py#L23-L92)

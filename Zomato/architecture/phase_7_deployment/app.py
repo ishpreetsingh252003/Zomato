@@ -8,8 +8,11 @@ import json
 
 # --- STREAMLIT SECRETS (Cloud) + .env (Local) ---
 # Streamlit Cloud doesn't have .env files; read API key from secrets instead.
-if "GROQ_API_KEY" in st.secrets:
-    os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+try:
+    if "GROQ_API_KEY" in st.secrets:
+        os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+except Exception:
+    pass
 
 # --- PATH CONFIGURATION ---
 _DEPLOY_DIR = Path(__file__).resolve().parent

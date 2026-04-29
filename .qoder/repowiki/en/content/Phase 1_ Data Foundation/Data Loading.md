@@ -10,7 +10,16 @@
 - [sample_input.json](file://Zomato/architecture/phase_1_data_foundation/sample_input.json)
 - [sample_restaurants.jsonl](file://Zomato/architecture/phase_3_candidate_retrieval/sample_restaurants.jsonl)
 - [requirements.txt](file://Zomato/architecture/phase_1_data_foundation/requirements.txt)
+- [phase_3_pipeline.py](file://Zomato/architecture/phase_3_candidate_retrieval/pipeline.py)
+- [orchestrator.py](file://Zomato/architecture/phase_6_monitoring/backend/orchestrator.py)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated load_from_jsonl() documentation to reflect support for compressed JSONL files
+- Added information about compressed file format detection and handling
+- Updated practical examples to include compressed file usage patterns
+- Enhanced troubleshooting guide with compressed file format considerations
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -29,10 +38,12 @@ This document explains the Data Loading component responsible for ingesting raw 
 - load_from_huggingface(): Hugging Face dataset integration with optional streaming and row limits
 - iterate_huggingface_rows(): Memory-efficient streaming iterator for large datasets
 - load_from_json(): Local JSON file processing (single object or array)
-- load_from_jsonl(): JSON Lines format ingestion
+- load_from_jsonl(): JSON Lines format ingestion with support for compressed and uncompressed files
 - load_from_csv(): CSV file parsing into normalized dictionaries
 
 It also documents dataset configuration constants, parameter usage, error handling, and performance considerations for batch versus streaming loads.
+
+**Updated** Enhanced to support compressed file formats (.gz) alongside uncompressed files for improved deployment flexibility.
 
 ## Project Structure
 The Data Loading component resides in the Data Foundation phase of the architecture and integrates with preprocessing and validation steps.
@@ -68,7 +79,7 @@ CLI --> PL
 - load_from_huggingface(dataset_id, split, *, streaming=False, max_rows=None): Loads a Hugging Face dataset into memory as a list of row dictionaries. For streaming, use iterate_huggingface_rows().
 - iterate_huggingface_rows(dataset_id, split, *, streaming=True): Yields rows one at a time for memory-efficient processing.
 - load_from_json(path): Reads a JSON file; expects either a list of objects or a single object.
-- load_from_jsonl(path): Reads a JSON Lines file, one record per line.
+- load_from_jsonl(path): Reads a JSON Lines file, one record per line. Supports both compressed (.gz) and uncompressed files.
 - load_from_csv(path): Reads a CSV file using DictReader and converts each row to a dictionary.
 
 Dataset configuration constants:
@@ -76,6 +87,8 @@ Dataset configuration constants:
 - DEFAULT_HF_SPLIT: Default dataset split to load
 
 These constants are imported and used by the pipeline to configure data sources.
+
+**Updated** Enhanced load_from_jsonl() to support compressed file formats for improved deployment flexibility.
 
 **Section sources**
 - [data_loader.py:14-77](file://Zomato/architecture/phase_1_data_foundation/data_loader.py#L14-L77)
@@ -195,6 +208,8 @@ Purpose:
 
 Key behaviors:
 - Opens file with UTF-8 encoding.
+- Automatically detects compressed (.gz) and uncompressed files.
+- Supports both compressed (.gz) and uncompressed JSON Lines files.
 - Skips empty lines.
 - Parses each non-empty line as a JSON object.
 
@@ -204,8 +219,15 @@ Parameters:
 Error handling:
 - No explicit error handling for malformed lines; depends on json.loads behavior.
 
+Performance considerations:
+- Streams line-by-line; memory-efficient for large JSON Lines files.
+- Automatically handles compressed files without additional configuration.
+
 Practical usage:
 - Large datasets stored in JSON Lines format.
+- Supports both compressed (.gz) and uncompressed files for deployment flexibility.
+
+**Updated** Enhanced to automatically detect and handle compressed (.gz) JSON Lines files alongside uncompressed files.
 
 **Section sources**
 - [data_loader.py:63-71](file://Zomato/architecture/phase_1_data_foundation/data_loader.py#L63-L71)
@@ -253,7 +275,8 @@ These constants are imported by the pipeline and CLI to configure the data sourc
   - Provide path to a JSON file; supports list or single object root.
 
 - Loading from JSON Lines:
-  - Provide path to a JSON Lines file; each line is a separate record.
+  - Provide path to a JSON Lines file; supports both compressed (.gz) and uncompressed files.
+  - Each line is a separate record.
 
 - Loading from CSV:
   - Provide path to a CSV file; headers become dictionary keys.
@@ -264,6 +287,12 @@ These constants are imported by the pipeline and CLI to configure the data sourc
 - Streaming consumption patterns:
   - Use iterate_huggingface_rows for memory-efficient processing of large datasets.
 
+- Compressed file usage:
+  - JSON Lines files with .gz extension are automatically detected and decompressed.
+  - Supports deployment scenarios where compressed files are preferred for storage efficiency.
+
+**Updated** Added examples for compressed file usage patterns and automatic format detection.
+
 **Section sources**
 - [pipeline.py:21-67](file://Zomato/architecture/phase_1_data_foundation/pipeline.py#L21-L67)
 - [__main__.py:18-27](file://Zomato/architecture/phase_1_data_foundation/__main__.py#L18-L27)
@@ -272,6 +301,7 @@ These constants are imported by the pipeline and CLI to configure the data sourc
 External dependencies:
 - datasets: Used for Hugging Face dataset loading in load_from_huggingface and iterate_huggingface_rows.
 - pydantic: Used for schema validation in schema.py.
+- gzip: Used for automatic decompression of compressed JSON Lines files in other pipeline components.
 - flask: Optional web UI dependency (not used in data loading).
 
 Internal dependencies:
@@ -283,16 +313,22 @@ Internal dependencies:
 graph LR
 datasets["datasets (external)"] --> DL["data_loader.py"]
 pydantic["pydantic (external)"] --> SC["schema.py"]
+gzip["gzip (external)"] --> PH3["phase_3_pipeline.py"]
+gzip --> ORCH["orchestrator.py"]
 DL --> PL["pipeline.py"]
 PL --> PR["preprocess.py"]
 PR --> SC
 CLI["__main__.py"] --> PL
 ```
 
+**Updated** Added gzip dependency for compressed file support in other pipeline components.
+
 **Diagram sources**
 - [requirements.txt:1-4](file://Zomato/architecture/phase_1_data_foundation/requirements.txt#L1-L4)
 - [data_loader.py:25](file://Zomato/architecture/phase_1_data_foundation/data_loader.py#L25)
 - [schema.py:7](file://Zomato/architecture/phase_1_data_foundation/schema.py#L7)
+- [phase_3_pipeline.py:5](file://Zomato/architecture/phase_3_candidate_retrieval/pipeline.py#L5)
+- [orchestrator.py:5](file://Zomato/architecture/phase_6_monitoring/backend/orchestrator.py#L5)
 - [pipeline.py:9-18](file://Zomato/architecture/phase_1_data_foundation/pipeline.py#L9-L18)
 - [__main__.py:7](file://Zomato/architecture/phase_1_data_foundation/__main__.py#L7)
 
@@ -300,6 +336,8 @@ CLI["__main__.py"] --> PL
 - [requirements.txt:1-4](file://Zomato/architecture/phase_1_data_foundation/requirements.txt#L1-L4)
 - [data_loader.py:25](file://Zomato/architecture/phase_1_data_foundation/data_loader.py#L25)
 - [schema.py:7](file://Zomato/architecture/phase_1_data_foundation/schema.py#L7)
+- [phase_3_pipeline.py:5](file://Zomato/architecture/phase_3_candidate_retrieval/pipeline.py#L5)
+- [orchestrator.py:5](file://Zomato/architecture/phase_6_monitoring/backend/orchestrator.py#L5)
 - [pipeline.py:9-18](file://Zomato/architecture/phase_1_data_foundation/pipeline.py#L9-L18)
 - [__main__.py:7](file://Zomato/architecture/phase_1_data_foundation/__main__.py#L7)
 
@@ -318,13 +356,14 @@ CLI["__main__.py"] --> PL
 
 - load_from_jsonl():
   - Streams line-by-line; memory-efficient for large JSON Lines files.
+  - Automatically handles compressed (.gz) files without additional configuration.
   - Skips empty lines automatically.
 
 - load_from_csv():
   - DictReader reads and parses each row; memory usage scales with number of rows.
   - Encoding and newline handling ensure cross-platform compatibility.
 
-[No sources needed since this section provides general guidance]
+**Updated** Enhanced load_from_jsonl() performance considerations to include compressed file handling capabilities.
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -347,6 +386,13 @@ Common issues and resolutions:
   - After preprocessing and validation, errors are collected and reported.
   - Review report for validation error counts and samples.
 
+- Compressed file format issues:
+  - JSON Lines files with .gz extension are automatically detected and decompressed.
+  - Ensure proper file permissions for compressed files.
+  - Verify file integrity if decompression fails.
+
+**Updated** Added troubleshooting guidance for compressed file format handling.
+
 **Section sources**
 - [data_loader.py:28-29](file://Zomato/architecture/phase_1_data_foundation/data_loader.py#L28-L29)
 - [data_loader.py:60](file://Zomato/architecture/phase_1_data_foundation/data_loader.py#L60)
@@ -354,9 +400,9 @@ Common issues and resolutions:
 - [schema.py:41-53](file://Zomato/architecture/phase_1_data_foundation/schema.py#L41-L53)
 
 ## Conclusion
-The Data Loading component provides flexible ingestion of Zomato-style restaurant data from multiple sources. It offers both batch and streaming modes, robust error handling for invalid formats, and practical controls like max_rows for partial data loading. By combining these loaders with preprocessing and validation, the system ensures clean, standardized data ready for downstream phases.
+The Data Loading component provides flexible ingestion of Zomato-style restaurant data from multiple sources. It offers both batch and streaming modes, robust error handling for invalid formats, and practical controls like max_rows for partial data loading. The component now supports both compressed (.gz) and uncompressed file formats for enhanced deployment flexibility. By combining these loaders with preprocessing and validation, the system ensures clean, standardized data ready for downstream phases.
 
-[No sources needed since this section summarizes without analyzing specific files]
+**Updated** Enhanced conclusion to reflect compressed file format support capabilities.
 
 ## Appendices
 
@@ -375,7 +421,25 @@ The Data Loading component provides flexible ingestion of Zomato-style restauran
 ### Example Data Files
 - sample_input.json: Sample JSON array with restaurant entries
 - sample_restaurants.jsonl: Sample JSON Lines file with restaurant entries
+- phase1_live.jsonl.gz: Compressed JSON Lines file for production deployment
+
+**Updated** Added compressed file example to demonstrate deployment scenarios.
 
 **Section sources**
 - [sample_input.json:1-14](file://Zomato/architecture/phase_1_data_foundation/sample_input.json#L1-L14)
 - [sample_restaurants.jsonl:1-5](file://Zomato/architecture/phase_3_candidate_retrieval/sample_restaurants.jsonl#L1-L5)
+
+### Compressed File Format Support
+The system supports automatic detection and handling of compressed JSON Lines files:
+
+- File extensions: .gz for compressed, no extension for uncompressed
+- Automatic detection: File suffix determines opener selection
+- Deployment scenarios: Compressed files (.gz) preferred for cloud storage efficiency
+- Backward compatibility: Uncompressed files continue to work without modification
+
+**New Section** Added to document compressed file format capabilities.
+
+**Section sources**
+- [phase_3_pipeline.py:14-24](file://Zomato/architecture/phase_3_candidate_retrieval/pipeline.py#L14-L24)
+- [orchestrator.py:23-45](file://Zomato/architecture/phase_6_monitoring/backend/orchestrator.py#L23-L45)
+- [phase_1_data_foundation/output/phase1_live.jsonl.gz](file://Zomato/architecture/phase_1_data_foundation/output/phase1_live.jsonl.gz)
